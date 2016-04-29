@@ -17,17 +17,15 @@ require_relative 'ssl_transport'
 
 module SumologicCloudSyslog
   class Logger
-    attr_reader :host, :port, :cert, :key, :transport
+    attr_reader :token
+    attr_accessor :transport
 
-    def initialize(host, port, token, cert: nil, key: nil)
-      @host = host
-      @port = port
-      @cert = cert
-      @key = key
-
+    # Logger accepts transport which should implement IO methods
+    # close, closed? and write
+    def initialize(transport, token)
+      @transport = transport
       @default_header = SumologicCloudSyslog::Header.new
       @default_structured_data = SumologicCloudSyslog::StructuredData.new(token)
-      open
     end
 
     # Sets default facility for each message
@@ -50,19 +48,12 @@ module SumologicCloudSyslog
       @default_header.procid = val
     end
 
-    # Check if SSL connection is opened
-    def opened?
-      transport && !transport.closed?
+    # Check if IO is closed
+    def closed?
+      transport && transport.closed?
     end
 
-    # Open SSL connection
-    def open
-      @transport = SumologicCloudSyslog::SSLTransport.new(host, port, cert: cert, key: key)
-    end
-
-    # Close SSL connection
     def close
-      raise RuntimeError.new 'syslog not open' if transport.closed?
       transport.close
     end
 
@@ -84,7 +75,7 @@ module SumologicCloudSyslog
 
       m.msg = message
 
-      @transport.write(m.to_s)
+      transport.write(m.to_s)
     end
   end
 end

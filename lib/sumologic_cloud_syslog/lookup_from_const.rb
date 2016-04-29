@@ -31,19 +31,6 @@ module SumologicCloudSyslog
         dst[cval] = cval
         dst[cval.to_s] = cval
       end
-
-      self.class.send(:define_method, :keys) do
-        dst.keys
-      end
-
-      self.class.send(:define_method, :[]) do |key|
-        value_none = const_get :NONE
-        dst.fetch(key, value_none)
-      end
-
-      self.class.send(:define_method, :[]=) do
-        raise RuntimeError.new "#{self.class} is read only"
-      end
     end
   end
 end

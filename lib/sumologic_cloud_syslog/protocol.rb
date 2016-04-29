@@ -128,8 +128,7 @@ module SumologicCloudSyslog
       # Add message
       out << msg if msg.length > 0
       # Message must end with new line delimiter
-      out << "\n"
-      out.join(' ')
+      out.join(' ') + "\n"
     end
 
     def to_s
