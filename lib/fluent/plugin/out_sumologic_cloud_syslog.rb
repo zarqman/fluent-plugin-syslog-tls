@@ -16,8 +16,6 @@ require 'fluent/mixin/config_placeholders'
 require 'fluent/mixin/plaintextformatter'
 require 'socket'
 
-require 'sumologic_cloud_syslog/logger'
-
 module Fluent
   class SumologicCloudSyslogOutput < Fluent::Output
     Fluent::Plugin.register_output('sumologic_cloud_syslog', self)
@@ -45,7 +43,7 @@ module Fluent
 
     def initialize
       super
-
+      require 'sumologic_cloud_syslog/logger'
       @loggers = {}
     end
 
@@ -72,15 +70,24 @@ module Fluent
 
     # Get logger for given tag
     def logger(tag)
-      @loggers[tag] ||= begin
-        logger = ::SumologicCloudSyslog::Logger.new(host, port, token, cert: cert, key: key)
-        logger.facility(facility)
-        logger.hostname(hostname)
-        logger.app_name(tag)
-        logger
+      # Try to reuse existing logger
+      @loggers[tag] ||= new_logger(tag)
+
+      # Create new logger if old one is closed
+      if @loggers[tag].closed?
+        @loggers[tag] = new_logger(tag)
       end
-      @loggers[tag].reopen unless @loggers[tag].opened?
+
       @loggers[tag]
+    end
+
+    def new_logger(tag)
+      transport = ::SumologicCloudSyslog::SSLTransport.new(host, port, cert: cert, key: key)
+      logger = ::SumologicCloudSyslog::Logger.new(transport, token)
+      logger.facility(facility)
+      logger.hostname(hostname)
+      logger.app_name(tag)
+      logger
     end
 
     def emit(tag, es, chain)

@@ -27,11 +27,13 @@ In your Fluentd configuration, use `@type sumologic_cloud_syslog`. An example co
   @type sumologic_cloud_syslog
   host syslog.collection.us1.sumologic.com
   port 6514
-  token ''
-  cert ''
-  key ''
+  token 'YOUR-PRIVATE-TOKEN@IANA-ID'
 </match>
 ```
+
+For more configuration options see [configuration docs](docs/configuration.md)
+
+### Puppet
 
 If you are using Puppet for configuration management then an example configuration
 using the [wywygmbh/puppet-fluentd](http://github.com/wywygmbh/puppet-fluentd) puppet module would be:
@@ -54,7 +56,6 @@ using the [wywygmbh/puppet-fluentd](http://github.com/wywygmbh/puppet-fluentd) p
   },
 }
 ```
-
 
 ## License
 ---

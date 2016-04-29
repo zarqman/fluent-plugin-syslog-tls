@@ -20,7 +20,18 @@ module SumologicCloudSyslog
   class SSLTransport
     attr_accessor :socket
 
+    attr_reader :host, :port, :cert, :key, :ssl_version
+
     def initialize(host, port, cert: nil, key: nil, ssl_version: :TLSv1_2)
+      @host = host
+      @port = port
+      @cert = cert
+      @key = key
+      @ssl_version = ssl_version
+      connect
+    end
+
+    def connect
       tcp = TCPSocket.new(host, port)
 
       ctx = OpenSSL::SSL::SSLContext.new
