@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.email         = ['engineering@acquia.com']
   s.summary       = %q{Fluent Sumologic Cloud Syslog plugin}
   s.description   = %q{Sumologic Cloud Syslog output plugin for Fluent event collector}
-  s.homepage      = 'https://github.com/acquia/fluent-sumologic-cloud-syslog'
+  s.homepage      = 'https://github.com/acquia/fluent-plugin-sumologic-cloud-syslog'
   s.license       = 'Apache v2'
   s.files         = `git ls-files`.split($/)
   s.executables   = s.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
@@ -39,5 +39,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rake', '~> 10.5'
   s.add_development_dependency 'test-unit', '~> 3.1'
   s.add_development_dependency 'webmock', '~> 2.0'
-  s.add_development_dependency 'simplecov'
+  s.add_development_dependency 'simplecov', '~> 0.11'
 end
