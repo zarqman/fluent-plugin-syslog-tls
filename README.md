@@ -1,8 +1,8 @@
 # Fluent::Plugin::SumologicCloudSyslog
 
-[![Gem Version](https://badge.fury.io/rb/fluent-plugin-sumologic-cloud-syslog.png)](http://badge.fury.io/rb/fluent-plugin-sumologic-cloud-syslog)
+[![Gem Version](https://badge.fury.io/rb/fluent-plugin-sumologic-cloud-syslog.svg)](http://badge.fury.io/rb/fluent-plugin-sumologic-cloud-syslog)
 [![Build Status](https://travis-ci.org/acquia/fluent-plugin-sumologic-cloud-syslog.png?branch=master)](https://travis-ci.org/acquia/fluent-plugin-sumologic-cloud-syslog)
-[![Coverage Status](https://coveralls.io/repos/acquia/fluent-plugin-sumologic-cloud-syslog/badge.png)](https://coveralls.io/r/acquia/fluent-plugin-sumologic-cloud-syslog)
+[![Coverage Status](https://coveralls.io/repos/github/acquia/fluent-plugin-sumologic-cloud-syslog/badge.svg?branch=master)](https://coveralls.io/github/acquia/fluent-plugin-sumologic-cloud-syslog)
 
 A [Fluentd](http://fluentd.org) plugin to send logs to the [Sumologic](https://www.sumologic.com/) Cloud Syslog collectors.
 
