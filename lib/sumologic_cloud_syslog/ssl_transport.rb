@@ -22,12 +22,15 @@ module SumologicCloudSyslog
 
     attr_reader :host, :port, :cert, :key, :ssl_version
 
-    def initialize(host, port, cert: nil, key: nil, ssl_version: :TLSv1_2)
+    attr_writer :retries
+
+    def initialize(host, port, cert: nil, key: nil, ssl_version: :TLSv1_2, max_retries: 1)
       @host = host
       @port = port
       @cert = cert
       @key = key
       @ssl_version = ssl_version
+      @retries = max_retries
       connect
     end
 
@@ -43,6 +46,21 @@ module SumologicCloudSyslog
 
       @socket = OpenSSL::SSL::SSLSocket.new(tcp, ctx)
       @socket.connect
+    end
+
+    # Allow to retry on failed writes
+    def write(s)
+      begin
+        retry_id ||= 0
+        @socket.send(:write, s)
+      rescue => e
+        if (retry_id += 1) < retries
+          connect
+          retry
+        else
+          raise e
+        end
+      end
     end
 
     # Forward any methods directly to SSLSocket
