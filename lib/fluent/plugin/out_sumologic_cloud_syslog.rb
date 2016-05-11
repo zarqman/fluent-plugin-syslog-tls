@@ -82,7 +82,7 @@ module Fluent
     end
 
     def new_logger(tag)
-      transport = ::SumologicCloudSyslog::SSLTransport.new(host, port, cert: cert, key: key)
+      transport = ::SumologicCloudSyslog::SSLTransport.new(host, port, cert: cert, key: key, retries: 3)
       logger = ::SumologicCloudSyslog::Logger.new(transport, token)
       logger.facility(facility)
       logger.hostname(hostname)
