@@ -35,6 +35,11 @@ module SumologicCloudSyslog
     end
 
     def connect
+      @socket = get_ssl_connection
+      @socket.connect
+    end
+
+    def get_ssl_connection
       tcp = TCPSocket.new(host, port)
 
       ctx = OpenSSL::SSL::SSLContext.new
@@ -43,9 +48,7 @@ module SumologicCloudSyslog
 
       ctx.cert = OpenSSL::X509::Certificate.new(File.open(cert)) if cert
       ctx.key = OpenSSL::PKey::RSA.new(File.open(key)) if key
-
-      @socket = OpenSSL::SSL::SSLSocket.new(tcp, ctx)
-      @socket.connect
+      OpenSSL::SSL::SSLSocket.new(tcp, ctx)
     end
 
     # Allow to retry on failed writes
@@ -54,7 +57,7 @@ module SumologicCloudSyslog
         retry_id ||= 0
         @socket.send(:write, s)
       rescue => e
-        if (retry_id += 1) < retries
+        if (retry_id += 1) < @retries
           connect
           retry
         else

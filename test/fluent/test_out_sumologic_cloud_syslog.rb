@@ -13,11 +13,12 @@
 # limitations under the License.
 
 require 'helper'
+require 'ssl'
 require 'date'
 require 'minitest/mock'
 require 'fluent/plugin/out_sumologic_cloud_syslog'
 
-class SumologicCloudSyslogOutput < Test::Unit::TestCase
+class SumologicCloudSyslogOutput < SSLTest
   def setup
     Fluent::Test.setup
     @driver = nil
@@ -134,5 +135,40 @@ class SumologicCloudSyslogOutput < Test::Unit::TestCase
     end
 
     assert_true logger.transport.string.start_with?("<128>1")
+  end
+
+  def test_ssl
+    time = Time.now
+    record = sample_record
+    formatted_time = time.dup.utc.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    server = ssl_server
+    st = Thread.new {
+        client = server.accept
+        assert_equal client.gets, "<134>1 #{time.to_datetime.rfc3339} host app #{$$} 1000 [1234567890] #{formatted_time}\ttest\t#{record.to_json.to_s}\n"
+        client.close
+    }
+
+    config = %{
+      host   localhost
+      port   #{server.addr[1]}
+      cert
+      key
+      token  1234567890
+      hostname_key hostname
+      procid_key procid
+      app_name_key app_name
+      msgid_key msgid
+    }
+    instance = driver('test', config).instance
+
+    chain = Minitest::Mock.new
+    chain.expect(:next, nil)
+
+    SumologicCloudSyslog::SSLTransport.stub_any_instance(:get_ssl_connection, ssl_client) do
+      instance.emit('test', {time.to_i => record}, chain)
+    end
+
+    st.join
   end
 end
