@@ -16,7 +16,9 @@ require 'helper'
 require 'ssl'
 require 'sumologic_cloud_syslog/ssl_transport'
 
-class SSLTransport < SSLTest
+class SSLTransport < Test::Unit::TestCase
+  include SSLTestHelper
+
   def test_ok_connection
     server = ssl_server
     st = Thread.new {
@@ -34,7 +36,6 @@ class SSLTransport < SSLTest
 
   def test_retry
     client = Object.new
-    client.class.module_eval { attr_accessor :retries }
     def client.connect
       true
     end

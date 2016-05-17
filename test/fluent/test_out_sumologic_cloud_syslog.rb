@@ -18,7 +18,9 @@ require 'date'
 require 'minitest/mock'
 require 'fluent/plugin/out_sumologic_cloud_syslog'
 
-class SumologicCloudSyslogOutput < SSLTest
+class SumologicCloudSyslogOutput < Test::Unit::TestCase
+  include SSLTestHelper
+
   def setup
     Fluent::Test.setup
     @driver = nil
