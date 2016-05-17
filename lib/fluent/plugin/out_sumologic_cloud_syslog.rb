@@ -15,7 +15,6 @@
 require 'fluent/mixin/config_placeholders'
 require 'fluent/mixin/plaintextformatter'
 require 'socket'
-require 'logger'
 
 module Fluent
   class SumologicCloudSyslogOutput < Fluent::Output
