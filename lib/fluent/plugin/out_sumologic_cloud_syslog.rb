@@ -15,6 +15,7 @@
 require 'fluent/mixin/config_placeholders'
 require 'fluent/mixin/plaintextformatter'
 require 'socket'
+require 'logger'
 
 module Fluent
   class SumologicCloudSyslogOutput < Fluent::Output
@@ -105,13 +106,17 @@ module Fluent
                      'INFO'
                    end
 
-        # Send message to Sumo
-        logger(tag).log(severity, format(tag, time, record), time: Time.at(time)) { |header|
-          # Map syslog headers from record
-          @mappings.each do |name, record_key|
-            header.send("#{name}=", record[record_key]) unless record[record_key].nil?
+        # Send message to Sumologic
+        begin
+          logger(tag).log(severity, format(tag, time, record), time: Time.at(time)) do |header|
+            # Map syslog headers from record
+            @mappings.each do |name, record_key|
+              header.send("#{name}=", record[record_key]) unless record[record_key].nil?
+            end
           end
-        }
+        rescue => e
+          log.error e.to_s
+        end
       end
     end
   end
