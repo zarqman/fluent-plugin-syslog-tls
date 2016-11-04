@@ -84,8 +84,7 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
       instance.emit('test', {time.to_i => record}, chain)
     end
 
-    formatted_time = time.dup.utc.strftime("%Y-%m-%dT%H:%M:%SZ")
-    assert_equal "<134>1 #{time.to_datetime.rfc3339} - - - - - #{formatted_time}\ttest\t#{record.to_json.to_s}\n\n", logger.transport.string
+    assert_equal "<134>1 #{time.to_datetime.rfc3339} - - - - - #{record.to_json.to_s}\n\n", logger.transport.string
   end
 
   def test_message_headers_mapping
@@ -139,6 +138,32 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
     assert_true logger.transport.string.start_with?("<128>1")
   end
 
+  def test_formatter
+    config = %{
+      host   syslog.collection.us1.sumologic.com
+      port   6514
+      cert
+      key
+      token  1234567890
+      format out_file
+      utc    true
+    }
+    instance = driver('test', config).instance
+
+    time = Time.now
+    record = sample_record
+    logger = mock_logger
+
+    instance.stub(:new_logger, logger) do
+      chain = Minitest::Mock.new
+      chain.expect(:next, nil)
+      instance.emit('test', {time.to_i => record}, chain)
+    end
+
+    formatted_time = time.dup.utc.strftime("%Y-%m-%dT%H:%M:%SZ")
+    assert_equal "<134>1 #{time.to_datetime.rfc3339} - - - - [TOKEN] #{formatted_time}\ttest\t#{record.to_json.to_s}\n\n", logger.transport.string
+  end
+
   def test_ssl
     time = Time.now
     record = sample_record
@@ -146,7 +171,7 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
     server = ssl_server
     st = Thread.new {
         client = server.accept
-        assert_equal "<134>1 #{time.to_datetime.rfc3339} host app #{$$} 1000 [1234567890] #{formatted_time}\ttest\t#{record.to_json.to_s}\n", client.gets
+        assert_equal "<134>1 #{time.to_datetime.rfc3339} host app #{$$} 1000 [1234567890] #{record.to_json.to_s}\n", client.gets
         client.close
     }
 

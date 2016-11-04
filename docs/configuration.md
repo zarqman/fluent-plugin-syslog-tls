@@ -67,8 +67,6 @@ Optionally record key where to get msgid from the record. If not provided nil va
 
 ## Example
 
-This plugin makes use of [Fluent::Mixin::PlainTextFormatter](https://github.com/tagomoris/fluent-mixin-plaintextformatter) please check out its documentation for more configuration options.
-
 ```
 <match>
   @type syslog_tls
@@ -88,6 +86,10 @@ This plugin makes use of [Fluent::Mixin::PlainTextFormatter](https://github.com/
   procid_key ...
   msgid_key ...
 
+  # Fluent's standard formatting options are supported. Default is 'json'.
+  # Example: For Docker logs sent to Papertrail, sending only the log text:
+  format single_value
+  message_key log
 </match>
 ```
 
@@ -112,5 +114,8 @@ This plugin makes use of [Fluent::Mixin::PlainTextFormatter](https://github.com/
   app_name_key ...
   procid_key ...
   msgid_key ...
+
+  # Fluent's standard formatting options are supported. Default is 'json'.
+  format json
 </match>
 ```

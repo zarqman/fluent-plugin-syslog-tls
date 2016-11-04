@@ -29,6 +29,7 @@ Sumologic:
   host syslog.collection.us1.sumologic.com
   port 6514
   token 'YOUR-PRIVATE-TOKEN@IANA-ID'
+  format json
 </match>
 ```
 
@@ -38,6 +39,7 @@ Papertrail:
   @type syslog_tls
   host logs1.papertrailapp.com
   port 12345
+  format single_value
 </match>
 ```
 
@@ -48,7 +50,9 @@ For more configuration options see [configuration docs](docs/configuration.md)
 
 This plugin is derived from [Fluent::Plugin::SumologicCloudSyslog](https://github.com/acquia/fluent-plugin-sumologic-cloud-syslog). Changes from the original:
 
+* Standard fluent formatting plugins are supported. Json output remains the default.
 * `token` (Structured Data in syslog terms) is now optional, for syslog hosts that don't require it.
+* Message payload in the syslog packet no longer duplicates Time or includes Tag by default.
 
 
 ## License
