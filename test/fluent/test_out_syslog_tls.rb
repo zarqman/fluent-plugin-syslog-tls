@@ -1,4 +1,5 @@
 # Copyright 2016 Acquia, Inc.
+# Copyright 2016 t.e.morgan.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,9 +17,9 @@ require 'helper'
 require 'ssl'
 require 'date'
 require 'minitest/mock'
-require 'fluent/plugin/out_sumologic_cloud_syslog'
+require 'fluent/plugin/out_syslog_tls'
 
-class SumologicCloudSyslogOutput < Test::Unit::TestCase
+class SyslogTlsOutputTest < Test::Unit::TestCase
   include SSLTestHelper
 
   def setup
@@ -27,7 +28,7 @@ class SumologicCloudSyslogOutput < Test::Unit::TestCase
   end
 
   def driver(tag='test', conf='')
-    @driver ||= Fluent::Test::OutputTestDriver.new(Fluent::SumologicCloudSyslogOutput, tag).configure(conf)
+    @driver ||= Fluent::Test::OutputTestDriver.new(Fluent::SyslogTlsOutput, tag).configure(conf)
   end
 
   def sample_record
@@ -41,10 +42,10 @@ class SumologicCloudSyslogOutput < Test::Unit::TestCase
     }
   end
 
-  def mock_logger
+  def mock_logger(token='TOKEN')
     io = StringIO.new
     io.set_encoding('utf-8')
-    logger = ::SumologicCloudSyslog::Logger.new(io, "TOKEN")
+    logger = ::SyslogTls::Logger.new(io, token)
   end
 
   def test_configure
@@ -70,13 +71,12 @@ class SumologicCloudSyslogOutput < Test::Unit::TestCase
       port   6514
       cert
       key
-      token  1234567890
     }
     instance = driver('test', config).instance
 
     time = Time.now
     record = sample_record
-    logger = mock_logger
+    logger = mock_logger(instance.token)
 
     instance.stub(:new_logger, logger) do
       chain = Minitest::Mock.new
@@ -85,7 +85,7 @@ class SumologicCloudSyslogOutput < Test::Unit::TestCase
     end
 
     formatted_time = time.dup.utc.strftime("%Y-%m-%dT%H:%M:%SZ")
-    assert_equal logger.transport.string, "<134>1 #{time.to_datetime.rfc3339} - - - - [TOKEN] #{formatted_time}\ttest\t#{record.to_json.to_s}\n\n"
+    assert_equal "<134>1 #{time.to_datetime.rfc3339} - - - - - #{formatted_time}\ttest\t#{record.to_json.to_s}\n\n", logger.transport.string
   end
 
   def test_message_headers_mapping
@@ -142,12 +142,11 @@ class SumologicCloudSyslogOutput < Test::Unit::TestCase
   def test_ssl
     time = Time.now
     record = sample_record
-    formatted_time = time.dup.utc.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     server = ssl_server
     st = Thread.new {
         client = server.accept
-        assert_equal client.gets, "<134>1 #{time.to_datetime.rfc3339} host app #{$$} 1000 [1234567890] #{formatted_time}\ttest\t#{record.to_json.to_s}\n"
+        assert_equal "<134>1 #{time.to_datetime.rfc3339} host app #{$$} 1000 [1234567890] #{formatted_time}\ttest\t#{record.to_json.to_s}\n", client.gets
         client.close
     }
 
@@ -167,7 +166,7 @@ class SumologicCloudSyslogOutput < Test::Unit::TestCase
     chain = Minitest::Mock.new
     chain.expect(:next, nil)
 
-    SumologicCloudSyslog::SSLTransport.stub_any_instance(:get_ssl_connection, ssl_client) do
+    SyslogTls::SSLTransport.stub_any_instance(:get_ssl_connection, ssl_client) do
       instance.emit('test', {time.to_i => record}, chain)
     end
 

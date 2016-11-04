@@ -1,4 +1,5 @@
 # Copyright 2016 Acquia, Inc.
+# Copyright 2016 t.e.morgan.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,32 +15,32 @@
 
 require 'helper'
 require 'date'
-require 'sumologic_cloud_syslog/logger'
+require 'syslog_tls/logger'
 
-class Logger < Test::Unit::TestCase
+class LoggerTest < Test::Unit::TestCase
   def test_logger_defaults
     io = StringIO.new
-    l = SumologicCloudSyslog::Logger.new(io, "TOKEN")
+    l = SyslogTls::Logger.new(io, "TOKEN")
     time = Time.now
     l.log(:WARN, "MESSAGE", time: time)
-    assert_equal io.string, "<132>1 #{time.to_datetime.rfc3339} - - - - [TOKEN] MESSAGE\n"
+    assert_equal "<132>1 #{time.to_datetime.rfc3339} - - - - [TOKEN] MESSAGE\n", io.string
   end
 
   def test_logger_default_headers
     io = StringIO.new
-    l = SumologicCloudSyslog::Logger.new(io, "TOKEN")
+    l = SyslogTls::Logger.new(io, "TOKEN")
     l.hostname("hostname")
     l.app_name("appname")
     l.procid($$)
     l.facility("SYSLOG")
     time = Time.now
     l.log(:WARN, "MESSAGE", time: time)
-    assert_equal io.string, "<44>1 #{time.to_datetime.rfc3339} hostname appname #{$$} - [TOKEN] MESSAGE\n"
+    assert_equal "<44>1 #{time.to_datetime.rfc3339} hostname appname #{$$} - [TOKEN] MESSAGE\n", io.string
   end
 
   def test_logger_closed
     io = StringIO.new
-    l = SumologicCloudSyslog::Logger.new(io, "TOKEN")
+    l = SyslogTls::Logger.new(io, "TOKEN")
     assert_false l.closed?
     l.close
     assert_true l.closed?

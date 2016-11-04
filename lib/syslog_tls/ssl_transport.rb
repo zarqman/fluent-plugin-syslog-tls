@@ -15,7 +15,7 @@
 require 'socket'
 require 'openssl'
 
-module SumologicCloudSyslog
+module SyslogTls
   # Supports SSL connection to remote host
   class SSLTransport
     attr_accessor :socket

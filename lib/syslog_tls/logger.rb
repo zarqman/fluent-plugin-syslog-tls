@@ -1,4 +1,5 @@
 # Copyright 2016 Acquia, Inc.
+# Copyright 2016 t.e.morgan.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,17 +16,17 @@
 require_relative 'protocol'
 require_relative 'ssl_transport'
 
-module SumologicCloudSyslog
+module SyslogTls
   class Logger
     attr_reader :token
     attr_accessor :transport
 
     # Logger accepts transport which should implement IO methods
     # close, closed? and write
-    def initialize(transport, token)
+    def initialize(transport, token=nil)
       @transport = transport
-      @default_header = SumologicCloudSyslog::Header.new
-      @default_structured_data = SumologicCloudSyslog::StructuredData.new(token)
+      @default_header = SyslogTls::Header.new
+      @default_structured_data = SyslogTls::StructuredData.new(token)
     end
 
     # Sets default facility for each message
@@ -57,11 +58,11 @@ module SumologicCloudSyslog
       transport.close
     end
 
-    # Send log message with severity to Sumologic
+    # Send log message with severity to syslog
     def log(severity, message, time: nil)
       time ||= Time.now
 
-      m = SumologicCloudSyslog::Message.new
+      m = SyslogTls::Message.new
 
       # Include authentication header
       m.structured_data << @default_structured_data

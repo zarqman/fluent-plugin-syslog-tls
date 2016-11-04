@@ -1,61 +1,55 @@
-# Fluent::Plugin::SumologicCloudSyslog
+# Fluent::Plugin::SyslogTls
 
-[![Gem Version](https://badge.fury.io/rb/fluent-plugin-sumologic-cloud-syslog.svg)](http://badge.fury.io/rb/fluent-plugin-sumologic-cloud-syslog)
-[![Build Status](https://travis-ci.org/acquia/fluent-plugin-sumologic-cloud-syslog.png?branch=master)](https://travis-ci.org/acquia/fluent-plugin-sumologic-cloud-syslog)
-[![Coverage Status](https://coveralls.io/repos/github/acquia/fluent-plugin-sumologic-cloud-syslog/badge.svg?branch=master)](https://coveralls.io/github/acquia/fluent-plugin-sumologic-cloud-syslog)
+[![Gem Version](https://badge.fury.io/rb/fluent-plugin-syslog-tls.svg)](http://badge.fury.io/rb/fluent-plugin-syslog-tls)
 
-A [Fluentd](http://fluentd.org) plugin to send logs to the [Sumologic](https://www.sumologic.com/) Cloud Syslog collectors.
+A [Fluentd](http://fluentd.org) output plugin to send logs to various Syslog collectors using TLS (only).
+
+Tested with [Papertrail](https://papertrailapp.com) and should also work with [Sumologic](https://www.sumologic.com/) and likely others.
 
 
 ## Installation
 ---
 ```sh
-$ gem install fluent-plugin-sumologic-cloud-syslog
+$ gem install fluent-plugin-syslog-tls
 ```
 or
 ```sh
-$ td-agent-gem install fluent-plugin-sumologic-cloud-syslog
+$ td-agent-gem install fluent-plugin-syslog-tls
 ```
 
 
 ## Configuration
 ---
-In your Fluentd configuration, use `@type sumologic_cloud_syslog`. An example configuration would be:
+In your Fluentd configuration, use `@type syslog_tls`. Examples:
 
+Sumologic:
 ```
 <match **>
-  @type sumologic_cloud_syslog
+  @type syslog_tls
   host syslog.collection.us1.sumologic.com
   port 6514
   token 'YOUR-PRIVATE-TOKEN@IANA-ID'
 </match>
 ```
 
+Papertrail:
+```
+<match **>
+  @type syslog_tls
+  host logs1.papertrailapp.com
+  port 12345
+</match>
+```
+
 For more configuration options see [configuration docs](docs/configuration.md)
 
-### Puppet
 
-If you are using Puppet for configuration management then an example configuration
-using the [wywygmbh/puppet-fluentd](http://github.com/wywygmbh/puppet-fluentd) puppet module would be:
+## Origin/History
 
-```
-::fluentd::plugin { 'fluent-plugin-sumologic-cloud-syslog':
-  type => 'gem',
-}
+This plugin is derived from [Fluent::Plugin::SumologicCloudSyslog](https://github.com/acquia/fluent-plugin-sumologic-cloud-syslog). Changes from the original:
 
-::fluentd::match { 'sumologic_cloud_syslog':
-  priority => 10,
-  pattern  => '**',
-  config   => {
-    'type'  => 'sumologic_cloud_syslog',
-    'host'  => 'syslog.collection.us1.sumologic.com',
-    'port'  => 6514,
-    'token' => $token,
-    'cert'  => $cert,
-    'key'   => $key,
-  },
-}
-```
+* `token` (Structured Data in syslog terms) is now optional, for syslog hosts that don't require it.
+
 
 ## License
 ---

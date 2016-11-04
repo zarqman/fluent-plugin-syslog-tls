@@ -1,4 +1,5 @@
 # Copyright 2016 Acquia, Inc.
+# Copyright 2016 t.e.morgan.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +19,7 @@ require_relative 'facility'
 require_relative 'severity'
 
 # Syslog protocol https://tools.ietf.org/html/rfc5424
-module SumologicCloudSyslog
+module SyslogTls
   # RFC defined nil value
   NIL_VALUE = '-'
 
@@ -37,10 +38,10 @@ module SumologicCloudSyslog
       @severity = 'INFO'
       @facility = 'LOCAL0'
       @version = 1
-      @hostname = SumologicCloudSyslog::NIL_VALUE
-      @app_name = SumologicCloudSyslog::NIL_VALUE
-      @procid = SumologicCloudSyslog::NIL_VALUE
-      @msgid = SumologicCloudSyslog::NIL_VALUE
+      @hostname = NIL_VALUE
+      @app_name = NIL_VALUE
+      @procid = NIL_VALUE
+      @msgid = NIL_VALUE
     end
 
     def timestamp=(val)
@@ -92,6 +93,7 @@ module SumologicCloudSyslog
     # Format data structured data to
     # [id k="v" ...]
     def assemble
+      return NIL_VALUE unless id
       parts = [id]
       data.each do |k, v|
         # Characters ", ] and \ must be escaped to prevent any parsing errors
@@ -123,7 +125,7 @@ module SumologicCloudSyslog
       if structured_data.length > 0
         out << structured_data.map(&:to_s).join('')
       else
-        out << SumologicCloudSyslog::NIL_VALUE
+        out << NIL_VALUE
       end
       # Add message
       out << msg if msg.length > 0

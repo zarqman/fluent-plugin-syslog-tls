@@ -1,4 +1,5 @@
 # Copyright 2016 Acquia, Inc.
+# Copyright 2016 t.e.morgan.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,16 +15,16 @@
 
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'sumologic_cloud_syslog/version'
+require 'syslog_tls/version'
 
 Gem::Specification.new do |s|
-  s.name          = 'fluent-plugin-sumologic-cloud-syslog'
-  s.version       = SumologicCloudSyslog::VERSION
-  s.authors       = ['Acquia Engineering']
-  s.email         = ['engineering@acquia.com']
-  s.summary       = %q{Fluent Sumologic Cloud Syslog plugin}
-  s.description   = %q{Sumologic Cloud Syslog output plugin for Fluent event collector}
-  s.homepage      = 'https://github.com/acquia/fluent-plugin-sumologic-cloud-syslog'
+  s.name          = 'fluent-plugin-syslog-tls'
+  s.version       = SyslogTls::VERSION
+  s.authors       = ['thomas morgan']
+  s.email         = ['tm@iprog.com']
+  s.summary       = %q{Fluent Syslog TLS output plugin}
+  s.description   = %q{Syslog TLS output plugin with formatting support, for Fluentd}
+  s.homepage      = 'https://github.com/zarqman/fluent-plugin-syslog-tls'
   s.license       = 'Apache v2'
   s.files         = `git ls-files`.split($/)
   s.executables   = s.files.grep(%r{^bin/}).map{ |f| File.basename(f) }

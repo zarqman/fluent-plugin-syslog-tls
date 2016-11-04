@@ -9,7 +9,7 @@ apply to all messages.
 
 ### host
 
-Host represents DNS name of endpoint where should be data sent. Example: `syslog.collection.us1.sumologic.com`
+Host represents DNS name of endpoint where should be data sent. Example: `syslog.collection.us1.sumologic.com` or `logs1.papertrailapp.com`
 
 ### port
 
@@ -17,15 +17,15 @@ Example: `6514`
 
 ### token
 
-Private token that is unique per account. Example: `ABABABABABABA@99999`
+Some services require a token to identify the account. Example: `ABABABABABABA@99999`. Not required for Papertrail.
 
 ### cert
 
-Optionally path to private certificate for TLS connection. Example: `/path/to/crt/file.crt`
+Optionally path to client certificate for TLS connection. Example: `/path/to/crt/file.crt`
 
 ### key
 
-Optionally path to key for TLS connection. Example: `/path/to/key/file.key`
+Optionally path to client private key for TLS connection. Example: `/path/to/key/file.key`
 
 ### hostname
 
@@ -65,38 +65,35 @@ Optionally record key where to get procid from the record. If not provided nil v
 
 Optionally record key where to get msgid from the record. If not provided nil value will be sent.
 
-## Additional configuration
+## Example
 
 This plugin makes use of [Fluent::Mixin::PlainTextFormatter](https://github.com/tagomoris/fluent-mixin-plaintextformatter) please check out its documentation for more configuration options.
 
-## Puppet
-
-If you are using Puppet for configuration management then an example configuration
-using the [wywygmbh/puppet-fluentd](http://github.com/wywygmbh/puppet-fluentd) puppet module would be:
-
 ```
-::fluentd::plugin { 'fluent-plugin-sumologic-cloud-syslog':
-  type => 'gem',
-}
+<match>
+  @type syslog_tls
+  host logs1.papertrailapp.com
+  port 12345
 
-::fluentd::match { 'sumologic_cloud_syslog':
-  priority => 10,
-  pattern  => '**',
-  config   => {
-    'type'  => 'sumologic_cloud_syslog',
-    'host'  => 'syslog.collection.us1.sumologic.com',
-    'port'  => 6514,
-    'token' => $token,
-    'cert'  => $cert,
-    'key'   => $key,
-  },
-}
+  hostname static-hostname
+  facility SYSLOG
+
+  # You can configure syslog headers to be picked from actual message
+  # processed by plugin. If key is not provided '-' value will be sent
+  # which is NIL by syslog specification.
+  severity_key RECORD_SEVERITY_KEY
+  facility_key RECORD_FACILITY_KEY
+  hostname_key ...
+  app_name_key ...
+  procid_key ...
+  msgid_key ...
+
+</match>
 ```
-
-## Example
 
 ```
 <match>
+  @type syslog_tls
   host syslog.collection.us1.sumologic.com
   port 6514
   token [token]@[iana-id]

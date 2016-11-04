@@ -1,4 +1,5 @@
 # Copyright 2016 Acquia, Inc.
+# Copyright 2016 t.e.morgan.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,8 +18,8 @@ require 'fluent/mixin/plaintextformatter'
 require 'socket'
 
 module Fluent
-  class SumologicCloudSyslogOutput < Fluent::Output
-    Fluent::Plugin.register_output('sumologic_cloud_syslog', self)
+  class SyslogTlsOutput < Fluent::Output
+    Fluent::Plugin.register_output('syslog_tls', self)
 
     include Fluent::Mixin::PlainTextFormatter
     include Fluent::Mixin::ConfigPlaceholders
@@ -26,7 +27,7 @@ module Fluent
 
     config_param :host, :string
     config_param :port, :integer
-    config_param :token, :string
+    config_param :token, :string, :default => nil
     config_param :cert, :string, :default => nil
     config_param :key, :string, :default => nil
     config_param :hostname, :string, :default => nil
@@ -43,7 +44,7 @@ module Fluent
 
     def initialize
       super
-      require 'sumologic_cloud_syslog/logger'
+      require 'syslog_tls/logger'
       @loggers = {}
     end
 
@@ -82,8 +83,8 @@ module Fluent
     end
 
     def new_logger(tag)
-      transport = ::SumologicCloudSyslog::SSLTransport.new(host, port, cert: cert, key: key, max_retries: 3)
-      logger = ::SumologicCloudSyslog::Logger.new(transport, token)
+      transport = ::SyslogTls::SSLTransport.new(host, port, cert: cert, key: key, max_retries: 3)
+      logger = ::SyslogTls::Logger.new(transport, token)
       logger.facility(facility)
       logger.hostname(hostname)
       logger.app_name(tag)
@@ -105,7 +106,7 @@ module Fluent
                      'INFO'
                    end
 
-        # Send message to Sumologic
+        # Send message to Syslog
         begin
           logger(tag).log(severity, format(tag, time, record), time: Time.at(time)) do |header|
             # Map syslog headers from record

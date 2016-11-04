@@ -14,7 +14,7 @@
 
 require_relative 'lookup_from_const'
 
-module SumologicCloudSyslog
+module SyslogTls
   module Severity
     extend LookupFromConst
     EMERG  = PANIC   = 0
