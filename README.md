@@ -10,12 +10,14 @@ Tested with [Papertrail](https://papertrailapp.com) and should also work with [S
 ## Installation
 ---
 ```sh
-$ gem install fluent-plugin-syslog-tls
+$ gem install fluent-plugin-syslog-tls -v '~> 0.5'
 ```
 or
 ```sh
-$ td-agent-gem install fluent-plugin-syslog-tls
+$ td-agent-gem install fluent-plugin-syslog-tls -v '~> 0.5'
 ```
+
+_Hint: Use v0.5+ for Fluentd 0.12 and v1.0+ for Fluentd 0.14. (See Version Compatibility below.)_
 
 
 ## Configuration
@@ -44,6 +46,14 @@ Papertrail:
 ```
 
 For more configuration options see [configuration docs](docs/configuration.md)
+
+
+## Version Compatibility
+
+* v0.x.x of this plugin is compatible with the Fluentd 0.12 series.
+* v1.x.x of this plugin is compatible with the Fluentd 0.14 series.
+
+Note that the v1.x series has more features and is more robust than the v0.x series.
 
 
 ## Origin/History

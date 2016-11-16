@@ -14,5 +14,5 @@
 # limitations under the License.
 
 module SyslogTls
-  VERSION = '1.0.0'
+  VERSION = '0.5.0'
 end

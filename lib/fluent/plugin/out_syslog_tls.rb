@@ -23,8 +23,6 @@ module Fluent
     include Fluent::Mixin::ConfigPlaceholders
     include Fluent::HandleTagNameMixin
 
-    helpers :inject, :formatter, :compat_parameters
-
     DEFAULT_FORMAT_TYPE = 'json'
 
     config_param :host, :string
@@ -44,11 +42,7 @@ module Fluent
       config_param "#{key_name}_key".to_sym, :string, :default => nil
     end
 
-    config_section :format do
-      config_set_default :@type, DEFAULT_FORMAT_TYPE
-    end
-
-    attr_accessor :formatter
+    config_param :format, :string, default: DEFAULT_FORMAT_TYPE
 
 
     def initialize
@@ -64,11 +58,6 @@ module Fluent
 
     # This method is called before starting.
     def configure(conf)
-      if conf['output_type'] && !conf['format']
-        conf['format'] = conf['output_type']
-      end
-      compat_parameters_convert(conf, :inject, :formatter)
-
       super
       @host = conf['host']
       @port = conf['port']
@@ -82,7 +71,8 @@ module Fluent
         @mappings[key_name] = conf[conf_key] if conf.key?(conf_key)
       end
 
-      @formatter = formatter_create(conf: conf.elements('format').first, default_type: DEFAULT_FORMAT_TYPE)
+      @formatter = Plugin.new_formatter(@format)
+      @formatter.configure(conf)
     end
 
     # Get logger for given tag
@@ -108,7 +98,6 @@ module Fluent
     end
 
     def format(tag, time, record)
-      record = inject_values_to_record(tag, time, record)
       @formatter.format(tag, time, record)
     end
 
