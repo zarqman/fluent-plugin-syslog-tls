@@ -25,13 +25,14 @@ module SyslogTls
 
     attr_accessor :socket
 
-    attr_reader :host, :port, :client_cert, :client_key, :ssl_version
+    attr_reader :host, :port, :idle_timeout, :client_cert, :client_key, :ssl_version
 
     attr_writer :retries
 
-    def initialize(host, port, client_cert: nil, client_key: nil, ssl_version: :TLSv1_2, max_retries: 1)
+    def initialize(host, port, idle_timeout: nil, client_cert: nil, client_key: nil, ssl_version: :TLSv1_2, max_retries: 1)
       @host = host
       @port = port
+      @idle_timeout = idle_timeout
       @client_cert = client_cert
       @client_key = client_key
       @ssl_version = ssl_version
@@ -52,6 +53,7 @@ module SyslogTls
       rescue Errno::ETIMEDOUT
         raise 'Socket timeout during connect'
       end
+      @last_write = Time.now if idle_timeout
     end
 
     def get_tcp_connection
@@ -103,6 +105,14 @@ module SyslogTls
 
     # Allow to retry on failed writes
     def write(s)
+      if idle_timeout
+        if (t=Time.now) > @last_write + idle_timeout
+          @socket.close rescue nil
+          connect
+        else
+          @last_write = t
+        end
+      end
       begin
         retry_id ||= 0
         do_write(s)

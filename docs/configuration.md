@@ -15,6 +15,10 @@ Host represents DNS name of endpoint where should be data sent. Example: `syslog
 
 Example: `6514`
 
+### idle_timeout
+
+If a given tag has gone this many seconds between log messages, disconnect and reconnect before sending logs. Useful in low-traffic logging situations with remote hosts that disconnect after a period of time. Disabled by default. Example: `600`
+
 ### token
 
 Some services require a token to identify the account. Example: `ABABABABABABA@99999`. Not required for Papertrail.
@@ -72,6 +76,7 @@ Optionally record key where to get msgid from the record. If not provided nil va
   @type syslog_tls
   host logs1.papertrailapp.com
   port 12345
+  idle_timeout 720
 
   hostname static-hostname
   facility SYSLOG
