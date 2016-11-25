@@ -3,6 +3,7 @@
 * Renamed `cert` and `key` to `client_cert` and `client_key` respectively.
 * Change to short timeouts on network calls so logging doesn't go dead for extended periods.
 * Added `idle_timeout` to force upstream reconnection after a period of time with no traffic for a particular tag. Useful for low-traffic senders. Not recommended for high-traffic.
+* Added `ca_cert` to validate the remote certificate. Defaults to 'system' which uses the system certificate store.
 
 
 #### 1.0.0

@@ -25,14 +25,15 @@ module SyslogTls
 
     attr_accessor :socket
 
-    attr_reader :host, :port, :idle_timeout, :client_cert, :client_key, :ssl_version
+    attr_reader :host, :port, :idle_timeout, :ca_cert, :client_cert, :client_key, :ssl_version
 
     attr_writer :retries
 
-    def initialize(host, port, idle_timeout: nil, client_cert: nil, client_key: nil, ssl_version: :TLSv1_2, max_retries: 1)
+    def initialize(host, port, idle_timeout: nil, ca_cert: 'system', client_cert: nil, client_key: nil, ssl_version: :TLSv1_2, max_retries: 1)
       @host = host
       @port = port
       @idle_timeout = idle_timeout
+      @ca_cert = ca_cert
       @client_cert = client_cert
       @client_key = client_key
       @ssl_version = ssl_version
@@ -95,6 +96,19 @@ module SyslogTls
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
       ctx.ssl_version = ssl_version
+
+      case ca_cert
+      when true, 'true', 'system'
+        # use system certs, same as openssl cli
+        ctx.cert_store = OpenSSL::X509::Store.new
+        ctx.cert_store.set_default_paths
+      when false, 'false'
+        ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      when %r{/$} # ends in /
+        ctx.ca_path = ca_cert
+      when String
+        ctx.ca_file = ca_cert
+      end
 
       ctx.cert = OpenSSL::X509::Certificate.new(File.read(client_cert)) if client_cert
       ctx.key = OpenSSL::PKey::read(File.read(client_key)) if client_key

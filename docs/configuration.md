@@ -19,6 +19,14 @@ Example: `6514`
 
 If a given tag has gone this many seconds between log messages, disconnect and reconnect before sending logs. Useful in low-traffic logging situations with remote hosts that disconnect after a period of time. Disabled by default. Example: `600`
 
+### ca_cert
+
+Whether and how to verify the server's TLS certificate. Examples:
+* ca_cert system - Default; use the system CA certificate store (which must then be configured correctly)
+* ca_cert false - Disable verification; not recommended
+* ca_cert /path/to/file - A path+filename to a single CA file
+* ca_cert /path/to/dir/ - A directory of CA files (in format that OpenSSL can parse); must end with /
+
 ### token
 
 Some services require a token to identify the account. Example: `ABABABABABABA@99999`. Not required for Papertrail.
