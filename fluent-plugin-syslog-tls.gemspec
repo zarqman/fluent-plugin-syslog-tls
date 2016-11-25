@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
   s.required_ruby_version = '>= 2.0.0'
 
-  s.add_runtime_dependency 'fluentd', '~> 0.12'
+  s.add_runtime_dependency 'fluentd', '~> 0.14'
   s.add_runtime_dependency 'fluent-mixin-config-placeholders', '~> 0.3'
 
   s.add_development_dependency 'minitest', '~> 5.8'

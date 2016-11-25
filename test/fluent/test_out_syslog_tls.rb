@@ -146,7 +146,7 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
       key
       token  1234567890
       format out_file
-      utc    true
+      localtime false
     }
     instance = driver('test', config).instance
 
