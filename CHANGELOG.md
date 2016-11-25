@@ -1,3 +1,8 @@
+#### 1.1.0
+
+* Renamed `cert` and `key` to `client_cert` and `client_key` respectively.
+
+
 #### 1.0.0
 
 * Standard fluent formatting plugins are supported. Json output remains the default.

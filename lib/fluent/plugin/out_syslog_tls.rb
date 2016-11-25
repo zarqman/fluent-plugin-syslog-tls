@@ -29,11 +29,11 @@ module Fluent
 
     config_param :host, :string
     config_param :port, :integer
-    config_param :token, :string, :default => nil
-    config_param :cert, :string, :default => nil
-    config_param :key, :string, :default => nil
-    config_param :hostname, :string, :default => nil
-    config_param :facility, :string, :default => 'LOCAL0'
+    config_param :token, :string, default: nil
+    config_param :client_cert, :string, default: nil
+    config_param :client_key, :string, default: nil
+    config_param :hostname, :string, default: nil
+    config_param :facility, :string, default: 'LOCAL0'
 
     # Allow to map keys from record to syslog message headers
     SYSLOG_HEADERS = [
@@ -41,7 +41,7 @@ module Fluent
     ]
 
     SYSLOG_HEADERS.each do |key_name|
-      config_param "#{key_name}_key".to_sym, :string, :default => nil
+      config_param "#{key_name}_key".to_sym, :string, default: nil
     end
 
     config_section :format do
@@ -99,7 +99,7 @@ module Fluent
     end
 
     def new_logger(tag)
-      transport = ::SyslogTls::SSLTransport.new(host, port, cert: cert, key: key, max_retries: 3)
+      transport = ::SyslogTls::SSLTransport.new(host, port, client_cert: client_cert, client_key: client_key, max_retries: 3)
       logger = ::SyslogTls::Logger.new(transport, token)
       logger.facility(facility)
       logger.hostname(hostname)

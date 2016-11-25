@@ -19,11 +19,11 @@ Example: `6514`
 
 Some services require a token to identify the account. Example: `ABABABABABABA@99999`. Not required for Papertrail.
 
-### cert
+### client_cert
 
 Optionally path to client certificate for TLS connection. Example: `/path/to/crt/file.crt`
 
-### key
+### client_key
 
 Optionally path to client private key for TLS connection. Example: `/path/to/key/file.key`
 
@@ -87,7 +87,7 @@ Optionally record key where to get msgid from the record. If not provided nil va
   msgid_key ...
 
   # Fluent's standard formatting options are supported. Default is 'json'.
-  # Example: For Docker logs sent to Papertrail, sending only the log text:
+  # Example: For Docker logs sent to Papertrail, send only the log text:
   format single_value
   message_key log
 </match>
@@ -99,8 +99,8 @@ Optionally record key where to get msgid from the record. If not provided nil va
   host syslog.collection.us1.sumologic.com
   port 6514
   token [token]@[iana-id]
-  cert /path/to/cert/file.crt
-  key /path/to/key/file.key
+  client_cert /path/to/cert/file.crt
+  client_key /path/to/key/file.key
 
   hostname static-hostname
   facility SYSLOG

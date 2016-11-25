@@ -52,16 +52,16 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
     config = %{
       host   syslog.collection.us1.sumologic.com
       port   6514
-      cert
-      key
+      client_cert
+      client_key
       token  1234567890
     }
     instance = driver('test', config).instance
 
     assert_equal 'syslog.collection.us1.sumologic.com', instance.host
     assert_equal '6514', instance.port
-    assert_equal '', instance.cert
-    assert_equal '', instance.key
+    assert_equal '', instance.client_cert
+    assert_equal '', instance.client_key
     assert_equal '1234567890', instance.token
   end
 
@@ -69,8 +69,8 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
     config = %{
       host   syslog.collection.us1.sumologic.com
       port   6514
-      cert
-      key
+      client_cert
+      client_key
     }
     instance = driver('test', config).instance
 
@@ -91,8 +91,8 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
     config = %{
       host   syslog.collection.us1.sumologic.com
       port   6514
-      cert
-      key
+      client_cert
+      client_key
       token  1234567890
       hostname_key hostname
       procid_key procid
@@ -118,8 +118,8 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
     config = %{
       host   syslog.collection.us1.sumologic.com
       port   6514
-      cert
-      key
+      client_cert
+      client_key
       token  1234567890
       severity_key severity
     }
@@ -142,8 +142,8 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
     config = %{
       host   syslog.collection.us1.sumologic.com
       port   6514
-      cert
-      key
+      client_cert
+      client_key
       token  1234567890
       format out_file
       localtime false
@@ -178,8 +178,8 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
     config = %{
       host   localhost
       port   #{server.addr[1]}
-      cert
-      key
+      client_cert
+      client_key
       token  1234567890
       hostname_key hostname
       procid_key procid

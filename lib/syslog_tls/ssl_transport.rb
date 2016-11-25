@@ -1,4 +1,5 @@
 # Copyright 2016 Acquia, Inc.
+# Copyright 2016 t.e.morgan.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,15 +21,15 @@ module SyslogTls
   class SSLTransport
     attr_accessor :socket
 
-    attr_reader :host, :port, :cert, :key, :ssl_version
+    attr_reader :host, :port, :client_cert, :client_key, :ssl_version
 
     attr_writer :retries
 
-    def initialize(host, port, cert: nil, key: nil, ssl_version: :TLSv1_2, max_retries: 1)
+    def initialize(host, port, client_cert: nil, client_key: nil, ssl_version: :TLSv1_2, max_retries: 1)
       @host = host
       @port = port
-      @cert = cert
-      @key = key
+      @client_cert = client_cert
+      @client_key = client_key
       @ssl_version = ssl_version
       @retries = max_retries
       connect
@@ -46,8 +47,8 @@ module SyslogTls
       ctx.set_params(verify_mode: OpenSSL::SSL::VERIFY_PEER)
       ctx.ssl_version = ssl_version
 
-      ctx.cert = OpenSSL::X509::Certificate.new(File.open(cert)) if cert
-      ctx.key = OpenSSL::PKey::RSA.new(File.open(key)) if key
+      ctx.cert = OpenSSL::X509::Certificate.new(File.read(client_cert)) if client_cert
+      ctx.key = OpenSSL::PKey::read(File.read(client_key)) if client_key
       OpenSSL::SSL::SSLSocket.new(tcp, ctx)
     end
 
