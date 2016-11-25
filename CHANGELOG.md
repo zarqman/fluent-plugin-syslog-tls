@@ -1,6 +1,7 @@
 #### 1.1.0
 
 * Renamed `cert` and `key` to `client_cert` and `client_key` respectively.
+* Change to short timeouts on network calls so logging doesn't go dead for extended periods.
 
 
 #### 1.0.0

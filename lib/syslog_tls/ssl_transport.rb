@@ -19,6 +19,10 @@ require 'openssl'
 module SyslogTls
   # Supports SSL connection to remote host
   class SSLTransport
+    CONNECT_TIMEOUT = 10
+    # READ_TIMEOUT    = 5
+    WRITE_TIMEOUT   = 5
+
     attr_accessor :socket
 
     attr_reader :host, :port, :client_cert, :client_key, :ssl_version
@@ -37,34 +41,115 @@ module SyslogTls
 
     def connect
       @socket = get_ssl_connection
-      @socket.connect
+      begin
+        begin
+          @socket.connect_nonblock
+        rescue Errno::EAGAIN, Errno::EWOULDBLOCK, IO::WaitReadable
+          select_with_timeout(@socket, :connect_read) && retry
+        rescue IO::WaitWritable
+          select_with_timeout(@socket, :connect_write) && retry
+        end
+      rescue Errno::ETIMEDOUT
+        raise 'Socket timeout during connect'
+      end
+    end
+
+    def get_tcp_connection
+      tcp = nil
+
+      family = Socket::Constants::AF_UNSPEC
+      sock_type = Socket::Constants::SOCK_STREAM
+      addr_info = Socket.getaddrinfo(host, port, family, sock_type, nil, nil, false).first
+      _, port, _, address, family, sock_type = addr_info
+
+      begin
+        sock_addr = Socket.sockaddr_in(port, address)
+        tcp = Socket.new(family, sock_type, 0)
+        tcp.setsockopt(Socket::SOL_SOCKET, Socket::Constants::SO_REUSEADDR, true)
+        tcp.setsockopt(Socket::SOL_SOCKET, Socket::Constants::SO_REUSEPORT, true)
+        tcp.connect_nonblock(sock_addr)
+      rescue Errno::EINPROGRESS
+        select_with_timeout(tcp, :connect_write)
+        begin
+          tcp.connect_nonblock(sock_addr)
+        rescue Errno::EISCONN
+          # all good
+        rescue SystemCallError
+          tcp.close rescue nil
+          raise
+        end
+      rescue SystemCallError
+        tcp.close rescue nil
+        raise
+      end
+
+      tcp.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, true)
+      tcp
     end
 
     def get_ssl_connection
-      tcp = TCPSocket.new(host, port)
+      tcp = get_tcp_connection
 
       ctx = OpenSSL::SSL::SSLContext.new
-      ctx.set_params(verify_mode: OpenSSL::SSL::VERIFY_PEER)
+      ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
       ctx.ssl_version = ssl_version
 
       ctx.cert = OpenSSL::X509::Certificate.new(File.read(client_cert)) if client_cert
       ctx.key = OpenSSL::PKey::read(File.read(client_key)) if client_key
-      OpenSSL::SSL::SSLSocket.new(tcp, ctx)
+      socket = OpenSSL::SSL::SSLSocket.new(tcp, ctx)
+      socket.sync_close = true
+      socket
     end
 
     # Allow to retry on failed writes
     def write(s)
       begin
         retry_id ||= 0
-        @socket.send(:write, s)
+        do_write(s)
       rescue => e
         if (retry_id += 1) < @retries
+          @socket.close rescue nil
           connect
           retry
         else
           raise e
         end
       end
+    end
+
+    def do_write(data)
+      data.force_encoding('BINARY') # so we can break in the middle of multi-byte characters
+      loop do
+        sent = 0
+        begin
+          sent = @socket.write_nonblock(data)
+        rescue OpenSSL::SSL::SSLError, Errno::EAGAIN, Errno::EWOULDBLOCK, IO::WaitWritable => e
+          if e.is_a?(OpenSSL::SSL::SSLError) && e.message !~ /write would block/
+            raise e
+          else
+            select_with_timeout(@socket, :write) && retry
+          end
+        end
+
+        break if sent >= data.size
+        data = data[sent, data.size]
+      end
+    end
+
+    def select_with_timeout(tcp, type)
+      o = case type
+      when :connect_read
+        args = [[tcp], nil, nil, CONNECT_TIMEOUT]
+      when :connect_write
+        args = [nil, [tcp], nil, CONNECT_TIMEOUT]
+      # when :read
+      #   args = [[tcp], nil, nil, READ_TIMEOUT]
+      when :write
+        args = [nil, [tcp], nil, WRITE_TIMEOUT]
+      else
+        raise "Unknown select type #{type}"
+      end
+      IO.select(*args) || raise("Socket timeout during #{type}")
     end
 
     # Forward any methods directly to SSLSocket

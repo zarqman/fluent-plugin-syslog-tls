@@ -37,10 +37,10 @@ class SSLTransportTest < Test::Unit::TestCase
 
   def test_retry
     client = Object.new
-    def client.connect
+    def client.connect_nonblock
       true
     end
-    def client.write(s)
+    def client.write_nonblock(s)
       raise "Test"
     end
 
