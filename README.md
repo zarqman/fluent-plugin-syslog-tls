@@ -48,11 +48,7 @@ For more configuration options see [configuration docs](docs/configuration.md)
 
 ## Origin/History
 
-This plugin is derived from [Fluent::Plugin::SumologicCloudSyslog](https://github.com/acquia/fluent-plugin-sumologic-cloud-syslog). Changes from the original:
-
-* Standard fluent formatting plugins are supported. Json output remains the default.
-* `token` (Structured Data in syslog terms) is now optional, for syslog hosts that don't require it.
-* Message payload in the syslog packet no longer duplicates Time or includes Tag by default.
+This plugin is derived from [Fluent::Plugin::SumologicCloudSyslog](https://github.com/acquia/fluent-plugin-sumologic-cloud-syslog). Changes are in the [Changelog](CHANGELOG.md).
 
 
 ## License
