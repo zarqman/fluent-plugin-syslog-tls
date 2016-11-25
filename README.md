@@ -17,6 +17,8 @@ or
 $ td-agent-gem install fluent-plugin-syslog-tls
 ```
 
+Note: `fluent-plugin-syslog-tls` is compatible with Fluent 0.14.
+
 
 ## Configuration
 ---
