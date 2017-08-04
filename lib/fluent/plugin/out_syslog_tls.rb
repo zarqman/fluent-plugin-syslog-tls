@@ -15,6 +15,7 @@
 
 require 'socket'
 require 'syslog_tls/logger'
+require 'fluent/plugin/output'
 
 module Fluent::Plugin
   class SyslogTlsOutput < Output
