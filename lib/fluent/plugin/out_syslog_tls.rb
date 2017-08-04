@@ -14,6 +14,7 @@
 # limitations under the License.
 
 require 'socket'
+require 'syslog_tls/logger'
 
 module Fluent::Plugin
   class SyslogTlsOutput < Output
@@ -51,7 +52,6 @@ module Fluent::Plugin
 
     def initialize
       super
-      require 'syslog_tls/logger'
       @loggers = {}
     end
 
