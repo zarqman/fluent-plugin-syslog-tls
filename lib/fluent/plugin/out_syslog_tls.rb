@@ -13,14 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'fluent/mixin/config_placeholders'
 require 'socket'
 
 module Fluent::Plugin
   class SyslogTlsOutput < Output
     Fluent::Plugin.register_output('syslog_tls', self)
-
-    include Fluent::HandleTagNameMixin
 
     helpers :inject, :formatter, :compat_parameters
 
