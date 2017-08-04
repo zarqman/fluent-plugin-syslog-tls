@@ -16,11 +16,10 @@
 require 'fluent/mixin/config_placeholders'
 require 'socket'
 
-module Fluent
-  class SyslogTlsOutput < Fluent::Output
+module Fluent::Plugin
+  class SyslogTlsOutput < Output
     Fluent::Plugin.register_output('syslog_tls', self)
 
-    include Fluent::Mixin::ConfigPlaceholders
     include Fluent::HandleTagNameMixin
 
     helpers :inject, :formatter, :compat_parameters
@@ -60,8 +59,8 @@ module Fluent
     end
 
     def shutdown
-      super
       @loggers.values.each(&:close)
+      super
     end
 
     # This method is called before starting.
@@ -114,8 +113,7 @@ module Fluent
       @formatter.format(tag, time, record)
     end
 
-    def emit(tag, es, chain)
-      chain.next
+    def process(tag, es)
       es.each do |time, record|
         record.each_pair do |_, v|
           v.force_encoding('utf-8') if v.is_a?(String)

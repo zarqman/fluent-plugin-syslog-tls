@@ -18,6 +18,7 @@ require 'ssl'
 require 'date'
 require 'minitest/mock'
 require 'fluent/plugin/out_syslog_tls'
+require 'fluent/test/driver/output'
 
 class SyslogTlsOutputTest < Test::Unit::TestCase
   include SSLTestHelper
@@ -27,8 +28,8 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
     @driver = nil
   end
 
-  def driver(tag='test', conf='')
-    @driver ||= Fluent::Test::OutputTestDriver.new(Fluent::SyslogTlsOutput, tag).configure(conf)
+  def driver(conf='')
+    @driver ||= Fluent::Test::Driver::Output.new(Fluent::Plugin::SyslogTlsOutput).configure(conf)
   end
 
   def sample_record
@@ -56,7 +57,7 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
       client_key
       token  1234567890
     }
-    instance = driver('test', config).instance
+    instance = driver(config).instance
 
     assert_equal 'syslog.collection.us1.sumologic.com', instance.host
     assert_equal '6514', instance.port
@@ -72,16 +73,14 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
       client_cert
       client_key
     }
-    instance = driver('test', config).instance
+    instance = driver(config).instance
 
     time = Time.now
     record = sample_record
     logger = mock_logger(instance.token)
 
     instance.stub(:new_logger, logger) do
-      chain = Minitest::Mock.new
-      chain.expect(:next, nil)
-      instance.emit('test', {time.to_i => record}, chain)
+      instance.process('test', {time.to_i => record})
     end
 
     assert_equal "<134>1 #{time.to_datetime.rfc3339} - - - - - #{record.to_json.to_s}\n\n", logger.transport.string
@@ -99,16 +98,14 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
       app_name_key app_name
       msgid_key msgid
     }
-    instance = driver('test', config).instance
+    instance = driver(config).instance
 
     time = Time.now
     record = sample_record
     logger = mock_logger
 
     instance.stub(:new_logger, logger) do
-      chain = Minitest::Mock.new
-      chain.expect(:next, nil)
-      instance.emit('test', {time.to_i => record}, chain)
+      instance.process('test', {time.to_i => record})
     end
 
     assert_true logger.transport.string.start_with?("<134>1 #{time.to_datetime.rfc3339} host app #{$$} 1000 [TOKEN]")
@@ -123,16 +120,14 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
       token  1234567890
       severity_key severity
     }
-    instance = driver('test', config).instance
+    instance = driver(config).instance
 
     time = Time.now
     record = sample_record
     logger = mock_logger
 
     instance.stub(:new_logger, logger) do
-      chain = Minitest::Mock.new
-      chain.expect(:next, nil)
-      instance.emit('test', {time.to_i => record}, chain)
+      instance.process('test', {time.to_i => record})
     end
 
     assert_true logger.transport.string.start_with?("<128>1")
@@ -148,16 +143,14 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
       format out_file
       localtime false
     }
-    instance = driver('test', config).instance
+    instance = driver(config).instance
 
     time = Time.now
     record = sample_record
     logger = mock_logger
 
     instance.stub(:new_logger, logger) do
-      chain = Minitest::Mock.new
-      chain.expect(:next, nil)
-      instance.emit('test', {time.to_i => record}, chain)
+      instance.process('test', {time.to_i => record})
     end
 
     formatted_time = time.dup.utc.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -186,13 +179,10 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
       app_name_key app_name
       msgid_key msgid
     }
-    instance = driver('test', config).instance
-
-    chain = Minitest::Mock.new
-    chain.expect(:next, nil)
+    instance = driver(config).instance
 
     SyslogTls::SSLTransport.stub_any_instance(:get_ssl_connection, ssl_client) do
-      instance.emit('test', {time.to_i => record}, chain)
+      instance.process('test', {time.to_i => record})
     end
 
     st.join
