@@ -36,7 +36,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'minitest', '~> 5.8'
   s.add_development_dependency 'minitest-stub_any_instance', '~> 1.0.0'
-  s.add_development_dependency 'rake', '~> 10.5'
+  s.add_development_dependency 'rake'
   s.add_development_dependency 'test-unit', '~> 3.1'
   s.add_development_dependency 'webmock', '~> 2.0'
   s.add_development_dependency 'simplecov', '~> 0.11'

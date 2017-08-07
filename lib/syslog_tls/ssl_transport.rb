@@ -161,7 +161,7 @@ module SyslogTls
     end
 
     def select_with_timeout(tcp, type)
-      o = case type
+      case type
       when :connect_read
         args = [[tcp], nil, nil, CONNECT_TIMEOUT]
       when :connect_write

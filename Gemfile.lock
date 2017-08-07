@@ -38,7 +38,7 @@ GEM
     msgpack (1.1.0)
     power_assert (1.0.2)
     public_suffix (2.0.5)
-    rake (10.5.0)
+    rake (12.0.0)
     ruby_dig (0.0.2)
     safe_yaml (1.0.4)
     serverengine (2.0.5)
@@ -75,7 +75,7 @@ DEPENDENCIES
   fluent-plugin-syslog-tls!
   minitest (~> 5.8)
   minitest-stub_any_instance (~> 1.0.0)
-  rake (~> 10.5)
+  rake
   simplecov (~> 0.11)
   test-unit (~> 3.1)
   webmock (~> 2.0)

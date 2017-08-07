@@ -25,7 +25,8 @@ module SyslogTls
 
   # All headers by specification wrapped in single object
   class Header
-    attr_accessor :facility, :severity, :version, :timestamp, :hostname, :app_name, :procid, :msgid
+    attr_accessor :version, :hostname, :app_name, :procid, :msgid
+    attr_reader :facility, :severity, :timestamp
 
     FACILITIES = {}
     SEVERITIES = {}

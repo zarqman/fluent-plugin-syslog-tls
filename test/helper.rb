@@ -19,12 +19,6 @@ SimpleCov.start
 
 Coveralls.wear! if ENV['TRAVIS']
 
-# Fluentd sets default encoding to ASCII-8BIT, but coverall can load git data which can contain UTF-8 characters
-at_exit do
-  Encoding.default_internal = 'UTF-8' if defined?(Encoding) && Encoding.respond_to?(:default_internal)
-  Encoding.default_external = 'UTF-8' if defined?(Encoding) && Encoding.respond_to?(:default_external)
-end
-
 require 'test/unit'
 require 'fluent/test'
 require 'minitest/pride'

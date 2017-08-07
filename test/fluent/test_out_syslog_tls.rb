@@ -46,7 +46,7 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
   def mock_logger(token='TOKEN')
     io = StringIO.new
     io.set_encoding('utf-8')
-    logger = ::SyslogTls::Logger.new(io, token)
+    ::SyslogTls::Logger.new(io, token)
   end
 
   def test_configure
