@@ -20,11 +20,12 @@ module SyslogTls
   class SSLTransport
     attr_accessor :socket
 
-    attr_reader :host, :port, :cert, :key, :ssl_version
+    attr_reader :host, :port, :ca_cert, :cert, :key, :ssl_version
 
     attr_writer :retries
 
-    def initialize(host, port, cert: nil, key: nil, ssl_version: :TLSv1_2, max_retries: 1)
+    def initialize(host, port, ca_cert: 'system', cert: nil, key: nil, ssl_version: :TLSv1_2, max_retries: 1)
+      @ca_cert = ca_cert
       @host = host
       @port = port
       @cert = cert
@@ -46,9 +47,24 @@ module SyslogTls
       ctx.set_params(verify_mode: OpenSSL::SSL::VERIFY_PEER)
       ctx.ssl_version = ssl_version
 
-      ctx.cert = OpenSSL::X509::Certificate.new(File.open(cert)) if cert
-      ctx.key = OpenSSL::PKey::RSA.new(File.open(key)) if key
-      OpenSSL::SSL::SSLSocket.new(tcp, ctx)
+      case ca_cert
+      when true, 'true', 'system'
+        # use system certs, same as openssl cli
+        ctx.cert_store = OpenSSL::X509::Store.new
+        ctx.cert_store.set_default_paths
+      when false, 'false'
+        ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      when %r{/$} # ends in /
+        ctx.ca_path = ca_cert
+      when String
+        ctx.ca_file = ca_cert
+      end
+
+      ctx.cert = OpenSSL::X509::Certificate.new(File.read(cert)) if cert
+      ctx.key = OpenSSL::PKey::read(File.read(key)) if key
+      socket = OpenSSL::SSL::SSLSocket.new(tcp, ctx)
+      socket.sync_close = true
+      socket
     end
 
     # Allow to retry on failed writes

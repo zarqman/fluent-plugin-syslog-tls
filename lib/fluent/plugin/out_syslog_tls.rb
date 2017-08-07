@@ -27,6 +27,7 @@ module Fluent
 
     config_param :host, :string
     config_param :port, :integer
+    config_param :ca_cert, :string, default: 'system'
     config_param :token, :string, :default => nil
     config_param :cert, :string, :default => nil
     config_param :key, :string, :default => nil
@@ -89,7 +90,7 @@ module Fluent
     end
 
     def new_logger(tag)
-      transport = ::SyslogTls::SSLTransport.new(host, port, cert: cert, key: key, max_retries: 3)
+      transport = ::SyslogTls::SSLTransport.new(host, port, ca_cert: ca_cert, cert: cert, key: key, max_retries: 3)
       logger = ::SyslogTls::Logger.new(transport, token)
       logger.facility(facility)
       logger.hostname(hostname)
