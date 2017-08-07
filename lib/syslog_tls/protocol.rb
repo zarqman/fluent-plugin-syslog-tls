@@ -111,12 +111,16 @@ module SyslogTls
 
   # Message represents full message that can be sent to syslog
   class Message
-    attr_accessor :header, :structured_data, :msg
+    attr_accessor :structured_data, :msg
+    attr_writer :header
 
     def initialize
       @msg = ''
       @structured_data = []
-      @header = Header.new
+    end
+
+    def header
+      @header ||= Header.new
     end
 
     def assemble
