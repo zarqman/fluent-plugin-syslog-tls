@@ -17,7 +17,7 @@ or
 $ td-agent-gem install fluent-plugin-syslog-tls -v '~> 0.6'
 ```
 
-_Hint: Use v0.6+ for Fluentd 0.12 and v1.0+ for Fluentd 0.14. (See Version Compatibility below.)_
+_Hint: Use v0.5+ for Fluentd 0.12 and v1.0+ for Fluentd 0.14. (See Version Compatibility below.)_
 
 
 ## Configuration
