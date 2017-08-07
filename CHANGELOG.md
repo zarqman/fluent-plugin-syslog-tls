@@ -1,3 +1,8 @@
+#### 1.2.0
+
+* Improve compliance with Fluentd 0.14 API.
+
+
 #### 1.1.0
 
 * Renamed `cert` and `key` to `client_cert` and `client_key` respectively.

@@ -8,7 +8,7 @@ Tested with [Papertrail](https://papertrailapp.com) and should also work with [S
 
 
 ## Installation
----
+
 ```sh
 $ gem install fluent-plugin-syslog-tls
 ```
@@ -21,7 +21,7 @@ Note: `fluent-plugin-syslog-tls` is compatible with Fluent 0.14. For Fluent 0.12
 
 
 ## Configuration
----
+
 In your Fluentd configuration, use `@type syslog_tls`. Examples:
 
 Sumologic:
@@ -54,7 +54,7 @@ This plugin is derived from [Fluent::Plugin::SumologicCloudSyslog](https://githu
 
 
 ## License
----
+
 Except as otherwise noted this software is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 Licensed under the Apache License, Version 2.0 (the "License");

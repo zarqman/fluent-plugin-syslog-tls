@@ -2,7 +2,6 @@ PATH
   remote: .
   specs:
     fluent-plugin-syslog-tls (1.1.0)
-      fluent-mixin-config-placeholders (~> 0.3)
       fluentd (~> 0.14.0)
 
 GEM
@@ -20,9 +19,6 @@ GEM
     crack (0.4.3)
       safe_yaml (~> 1.0.0)
     docile (1.1.5)
-    fluent-mixin-config-placeholders (0.4.0)
-      fluentd
-      uuidtools (>= 2.1.5)
     fluentd (0.14.20)
       cool.io (>= 1.4.5, < 2.0.0)
       http_parser.rb (>= 0.5.1, < 0.7.0)
@@ -65,7 +61,6 @@ GEM
       thread_safe (~> 0.1)
     tzinfo-data (1.2017.2)
       tzinfo (>= 1.0.0)
-    uuidtools (2.1.5)
     webmock (2.3.2)
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
