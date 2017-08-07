@@ -8,7 +8,7 @@ Tested with [Papertrail](https://papertrailapp.com) and should also work with [S
 
 
 ## Installation
----
+
 ```sh
 $ gem install fluent-plugin-syslog-tls -v '~> 0.6'
 ```
@@ -21,7 +21,7 @@ _Hint: Use v0.5+ for Fluentd 0.12 and v1.0+ for Fluentd 0.14. (See Version Compa
 
 
 ## Configuration
----
+
 In your Fluentd configuration, use `@type syslog_tls`. Examples:
 
 Sumologic:
@@ -58,15 +58,11 @@ Note that the v1.x series has more features and is more robust than the v0.x ser
 
 ## Origin/History
 
-This plugin is derived from [Fluent::Plugin::SumologicCloudSyslog](https://github.com/acquia/fluent-plugin-sumologic-cloud-syslog). Changes from the original:
-
-* Standard fluent formatting plugins are supported. Json output remains the default.
-* `token` (Structured Data in syslog terms) is now optional, for syslog hosts that don't require it.
-* Message payload in the syslog packet no longer duplicates Time or includes Tag by default.
+This plugin is derived from [Fluent::Plugin::SumologicCloudSyslog](https://github.com/acquia/fluent-plugin-sumologic-cloud-syslog). Changes for the v0.x+ series are in this branch's [Changelog](CHANGELOG.md).
 
 
 ## License
----
+
 Except as otherwise noted this software is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 Licensed under the Apache License, Version 2.0 (the "License");
