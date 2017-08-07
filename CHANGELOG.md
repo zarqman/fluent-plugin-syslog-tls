@@ -1,6 +1,7 @@
 #### 1.2.0
 
 * Improve compliance with Fluentd 0.14 API.
+* Eliminate excess Message#header object creation.
 
 
 #### 1.1.0
