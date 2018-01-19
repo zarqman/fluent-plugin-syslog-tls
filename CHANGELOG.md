@@ -1,3 +1,8 @@
+#### 1.2.1
+
+* Support Fluentd 1.0 (same API as 0.14).
+
+
 #### 1.2.0
 
 * Improve compliance with Fluentd 0.14 API.

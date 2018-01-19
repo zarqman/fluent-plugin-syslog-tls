@@ -1,5 +1,5 @@
 # Copyright 2016 Acquia, Inc.
-# Copyright 2016 t.e.morgan.
+# Copyright 2016-2018 t.e.morgan.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
   s.required_ruby_version = '>= 2.3.0'
 
-  s.add_runtime_dependency 'fluentd', '~> 0.14.0'
+  s.add_runtime_dependency 'fluentd', [">= 0.14.0", "< 2"]
 
   s.add_development_dependency 'minitest', '~> 5.8'
   s.add_development_dependency 'minitest-stub_any_instance', '~> 1.0.0'
