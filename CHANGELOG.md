@@ -1,3 +1,7 @@
+* Support SNI and enable cert name verification.
+* Require Ruby 2.4
+
+
 #### 1.2.1
 
 * Support Fluentd 1.0 (same API as 0.14).

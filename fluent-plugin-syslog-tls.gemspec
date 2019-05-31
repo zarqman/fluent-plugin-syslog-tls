@@ -1,5 +1,5 @@
 # Copyright 2016 Acquia, Inc.
-# Copyright 2016-2018 t.e.morgan.
+# Copyright 2016-2019 t.e.morgan.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ Gem::Specification.new do |s|
   s.executables   = s.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   s.test_files    = s.files.grep(%r{^(test|spec|features)/})
   s.require_paths = ['lib']
-  s.required_ruby_version = '>= 2.3.0'
+  s.required_ruby_version = '>= 2.4'
 
   s.add_runtime_dependency 'fluentd', [">= 0.14.0", "< 2"]
 
@@ -38,6 +38,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'minitest-stub_any_instance', '~> 1.0.0'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'test-unit', '~> 3.1'
-  s.add_development_dependency 'webmock', '~> 2.0'
+  s.add_development_dependency 'webmock', '~> 3.0'
   s.add_development_dependency 'simplecov', '~> 0.11'
 end
