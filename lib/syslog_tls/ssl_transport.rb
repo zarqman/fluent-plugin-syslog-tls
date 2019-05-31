@@ -113,6 +113,7 @@ module SyslogTls
       ctx.cert = OpenSSL::X509::Certificate.new(File.read(client_cert)) if client_cert
       ctx.key = OpenSSL::PKey::read(File.read(client_key)) if client_key
       socket = OpenSSL::SSL::SSLSocket.new(tcp, ctx)
+      socket.hostname = host
       socket.sync_close = true
       socket
     end
