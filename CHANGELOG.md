@@ -1,5 +1,9 @@
-* Support SNI and enable cert name verification.
+#### 2.0.0
+
 * Require Ruby 2.4
+* Support SNI and enable cert name verification by default. **This changes the default behavior** and may cause issues if the remote server's cert does not match the configured hostname.
+* Add `verify_cert_name` to enable (default) or disable cert name verification.
+  Note: `ca_cert` verifies the certificate signing chain. `verify_cert_name` verifies the CN/SAN name on the cert.
 
 
 #### 1.2.1

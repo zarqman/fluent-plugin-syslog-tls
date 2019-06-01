@@ -1,5 +1,5 @@
 # Copyright 2016 Acquia, Inc.
-# Copyright 2016 t.e.morgan.
+# Copyright 2016-2019 t.e.morgan.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ module Fluent::Plugin
     config_param :port, :integer
     config_param :idle_timeout, :integer, default: nil
     config_param :ca_cert, :string, default: 'system'
+    config_param :verify_cert_name, :bool, default: true
     config_param :token, :string, default: nil
     config_param :client_cert, :string, default: nil
     config_param :client_key, :string, default: nil
@@ -98,7 +99,14 @@ module Fluent::Plugin
     end
 
     def new_logger(tag)
-      transport = ::SyslogTls::SSLTransport.new(host, port, idle_timeout: idle_timeout, ca_cert: ca_cert, client_cert: client_cert, client_key: client_key, max_retries: 3)
+      transport = ::SyslogTls::SSLTransport.new(host, port,
+        idle_timeout: idle_timeout,
+        ca_cert: ca_cert,
+        client_cert: client_cert,
+        client_key: client_key,
+        verify_cert_name: verify_cert_name,
+        max_retries: 3,
+      )
       logger = ::SyslogTls::Logger.new(transport, token)
       logger.facility(facility)
       logger.hostname(hostname)

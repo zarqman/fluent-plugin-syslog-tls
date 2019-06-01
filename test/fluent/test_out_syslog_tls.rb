@@ -1,5 +1,5 @@
 # Copyright 2016 Acquia, Inc.
-# Copyright 2016 t.e.morgan.
+# Copyright 2016-2019 t.e.morgan.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
       port   6514
       client_cert
       client_key
+      verify_cert_name true
       token  1234567890
     }
     instance = driver(config).instance
@@ -63,6 +64,7 @@ class SyslogTlsOutputTest < Test::Unit::TestCase
     assert_equal '6514', instance.port
     assert_equal '', instance.client_cert
     assert_equal '', instance.client_key
+    assert_equal true, instance.verify_cert_name
     assert_equal '1234567890', instance.token
   end
 

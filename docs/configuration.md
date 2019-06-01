@@ -21,11 +21,15 @@ If a given tag has gone this many seconds between log messages, disconnect and r
 
 ### ca_cert
 
-Whether and how to verify the server's TLS certificate. Examples:
+Whether and how to verify the server's TLS certificate signing chain. Examples:
 * ca_cert system - Default; use the system CA certificate store (which must then be configured correctly)
 * ca_cert false - Disable verification; not recommended
 * ca_cert /path/to/file - A path+filename to a single CA file
 * ca_cert /path/to/dir/ - A directory of CA files (in format that OpenSSL can parse); must end with /
+
+### verify_cert_name
+
+Whether to verify that the server's cert matches `host`. Enabled by default (except when `ca_cert false`). Recommended; helps prevent MitM attacks. Example: `true`
 
 ### token
 
@@ -114,6 +118,7 @@ Optionally record key where to get msgid from the record. If not provided nil va
   token [token]@[iana-id]
   client_cert /path/to/cert/file.crt
   client_key /path/to/key/file.key
+  verify_cert_name true
 
   hostname static-hostname
   facility SYSLOG

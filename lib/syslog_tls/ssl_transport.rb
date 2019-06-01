@@ -1,5 +1,5 @@
 # Copyright 2016 Acquia, Inc.
-# Copyright 2016 t.e.morgan.
+# Copyright 2016-2019 t.e.morgan.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,17 +25,18 @@ module SyslogTls
 
     attr_accessor :socket
 
-    attr_reader :host, :port, :idle_timeout, :ca_cert, :client_cert, :client_key, :ssl_version
+    attr_reader :host, :port, :idle_timeout, :ca_cert, :client_cert, :client_key, :verify_cert_name, :ssl_version
 
     attr_writer :retries
 
-    def initialize(host, port, idle_timeout: nil, ca_cert: 'system', client_cert: nil, client_key: nil, ssl_version: :TLSv1_2, max_retries: 1)
+    def initialize(host, port, idle_timeout: nil, ca_cert: 'system', client_cert: nil, client_key: nil, verify_cert_name: true, ssl_version: :TLSv1_2, max_retries: 1)
       @host = host
       @port = port
       @idle_timeout = idle_timeout
       @ca_cert = ca_cert
       @client_cert = client_cert
       @client_key = client_key
+      @verify_cert_name = verify_cert_name
       @ssl_version = ssl_version
       @retries = max_retries
       connect
@@ -97,12 +98,15 @@ module SyslogTls
       ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
       ctx.ssl_version = ssl_version
 
+      ctx.verify_hostname = verify_cert_name != false
+
       case ca_cert
       when true, 'true', 'system'
         # use system certs, same as openssl cli
         ctx.cert_store = OpenSSL::X509::Store.new
         ctx.cert_store.set_default_paths
       when false, 'false'
+        ctx.verify_hostname = false
         ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE
       when %r{/$} # ends in /
         ctx.ca_path = ca_cert
