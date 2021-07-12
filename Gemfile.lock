@@ -7,8 +7,8 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    addressable (2.6.0)
-      public_suffix (>= 2.0.2, < 4.0)
+    addressable (2.8.0)
+      public_suffix (>= 2.0.2, < 5.0)
     cool.io (1.5.4)
     coveralls (0.8.23)
       json (>= 1.8, < 3)
@@ -38,7 +38,7 @@ GEM
     minitest-stub_any_instance (1.0.2)
     msgpack (1.2.10)
     power_assert (1.1.4)
-    public_suffix (3.1.0)
+    public_suffix (4.0.6)
     rake (12.3.2)
     safe_yaml (1.0.5)
     serverengine (2.1.1)
