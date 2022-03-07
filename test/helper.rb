@@ -12,12 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'coveralls'
 require 'simplecov'
 
 SimpleCov.start
-
-Coveralls.wear! if ENV['TRAVIS']
 
 require 'test/unit'
 require 'fluent/test'
