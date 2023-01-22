@@ -1,5 +1,5 @@
 # Copyright 2016 Acquia, Inc.
-# Copyright 2016 t.e.morgan.
+# Copyright 2016-2023 t.e.morgan.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,19 +20,36 @@ require 'syslog_tls/ssl_transport'
 class SSLTransportTest < Test::Unit::TestCase
   include SSLTestHelper
 
-  def test_ok_connection
-    server = ssl_server
-    st = Thread.new {
-      client = server.accept
-      assert_equal "TESTTEST2\n", client.gets
-      client.close
-    }
-    SyslogTls::SSLTransport.stub_any_instance(:get_ssl_connection, ssl_client) do
-      t = SyslogTls::SSLTransport.new("localhost", server.addr[1], max_retries: 3)
-      t.write("TEST")
-      t.write("TEST2\n")
+  # srvr-min  srvr-max clnt-min should-raise?
+  [ [:TLS1_2, :TLS1_2, :TLS1_2],
+    [:TLS1_2, :TLS1_3, :TLS1_2],
+    [:TLS1_3, :TLS1_3, :TLS1_2],
+    [:TLS1_2, :TLS1_2, :TLS1_3, true],
+    [:TLS1_2, :TLS1_3, :TLS1_3],
+    [:TLS1_3, :TLS1_3, :TLS1_3],
+  ].each do |(server_min, server_max, client_min, should_raise)|
+    define_method "test_#{server_min}-#{server_max}_server_#{client_min}_client" do
+      Thread.report_on_exception = false
+      blk = lambda do
+        server = ssl_server(min_version: server_min, max_version: server_max)
+        st = Thread.new {
+          client = server.accept
+          assert_equal "TESTTEST2\n", client.gets
+          client.close
+        }
+        t = SyslogTls::SSLTransport.new("localhost", server.addr[1], ca_cert: false, ssl_version: client_min)
+        t.write("TEST")
+        t.write("TEST2\n")
+        st.join
+      end
+      if should_raise
+        assert_raises OpenSSL::SSL::SSLError, &blk
+      else
+        blk.call
+      end
+    ensure
+      Thread.report_on_exception = true
     end
-    st.join
   end
 
   def test_retry

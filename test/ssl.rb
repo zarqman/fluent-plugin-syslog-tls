@@ -2,12 +2,14 @@ require 'socket'
 require 'openssl'
 
 module SSLTestHelper
-  def ssl_server
+  def ssl_server(min_version: nil, max_version: nil)
     @ssl_server ||= begin
       tcp_server = TCPServer.new("localhost", 33000 + Random.rand(1000))
       ssl_context = OpenSSL::SSL::SSLContext.new
       ssl_context.cert = certificate
       ssl_context.key = rsa_key
+      ssl_context.min_version = min_version if min_version
+      ssl_context.max_version = max_version if max_version
       OpenSSL::SSL::SSLServer.new(tcp_server, ssl_context)
     end
   end

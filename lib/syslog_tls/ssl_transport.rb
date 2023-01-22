@@ -1,5 +1,5 @@
 # Copyright 2016 Acquia, Inc.
-# Copyright 2016-2019 t.e.morgan.
+# Copyright 2016-2023 t.e.morgan.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ module SyslogTls
 
     attr_writer :retries
 
-    def initialize(host, port, idle_timeout: nil, ca_cert: 'system', client_cert: nil, client_key: nil, verify_cert_name: true, ssl_version: :TLSv1_2, max_retries: 1)
+    def initialize(host, port, idle_timeout: nil, ca_cert: 'system', client_cert: nil, client_key: nil, verify_cert_name: true, ssl_version: :TLS1_2, max_retries: 1)
       @host = host
       @port = port
       @idle_timeout = idle_timeout
@@ -96,7 +96,7 @@ module SyslogTls
 
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
-      ctx.ssl_version = ssl_version
+      ctx.min_version = ssl_version
 
       ctx.verify_hostname = verify_cert_name != false
 

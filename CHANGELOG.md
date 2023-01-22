@@ -1,3 +1,9 @@
+#### 2.1.0
+
+* Require Ruby 2.5
+* Allow TLS 1.3 (minimum remains TLS 1.2)
+
+
 #### 2.0.0
 
 * Require Ruby 2.4

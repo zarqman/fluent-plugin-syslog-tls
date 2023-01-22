@@ -1,5 +1,5 @@
 # Copyright 2016 Acquia, Inc.
-# Copyright 2016-2022 t.e.morgan.
+# Copyright 2016-2023 t.e.morgan.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ Gem::Specification.new do |s|
   s.executables   = s.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   s.test_files    = s.files.grep(%r{^(test|spec|features)/})
   s.require_paths = ['lib']
-  s.required_ruby_version = '>= 2.4'
+  s.required_ruby_version = '>= 2.5'
 
   s.add_runtime_dependency 'fluentd', [">= 0.14.0", "< 2"]
 
