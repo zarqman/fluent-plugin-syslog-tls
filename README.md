@@ -45,6 +45,28 @@ Papertrail:
 </match>
 ```
 
+File buffer (survives syslog server downtime; blocks ingest when the store is full):
+
+```
+<match **>
+  @type syslog_tls
+  host logs.example.com
+  port 6514
+  format json
+
+  <buffer tag>
+    @type file
+    path /var/log/fluentd/buffer/syslog_tls
+    overflow_action block
+    retry_type exponential_backoff
+    retry_timeout 72h
+    retry_forever false
+  </buffer>
+</match>
+```
+
+Without a `<buffer>` section the plugin still buffers in memory (default `flush_interval` 5s). That is not crash-safe. Keep `tag` as a chunk key (plugin default) so `app_name` and per-tag `idle_timeout` stay correct.
+
 For more configuration options see [configuration docs](docs/configuration.md)
 
 

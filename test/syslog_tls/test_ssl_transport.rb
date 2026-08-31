@@ -68,4 +68,38 @@ class SSLTransportTest < Test::Unit::TestCase
       end
     end
   end
+
+  def test_tcp_user_timeout_sockopt
+    omit 'Socket::TCP_USER_TIMEOUT is not defined' unless defined?(Socket::TCP_USER_TIMEOUT)
+
+    server = ssl_server
+    st = Thread.new {
+      client = server.accept
+      client.gets
+      client.close
+    }
+    t = SyslogTls::SSLTransport.new("localhost", server.addr[1], ca_cert: false, tcp_user_timeout: 15000)
+    tcp = t.socket.to_io
+    val = tcp.getsockopt(Socket::IPPROTO_TCP, Socket::TCP_USER_TIMEOUT)
+    assert_equal 15000, val.int
+    t.write(+"ok\n")
+    st.join
+  end
+
+  def test_tcp_user_timeout_disabled
+    omit 'Socket::TCP_USER_TIMEOUT is not defined' unless defined?(Socket::TCP_USER_TIMEOUT)
+
+    server = ssl_server
+    st = Thread.new {
+      client = server.accept
+      client.gets
+      client.close
+    }
+    t = SyslogTls::SSLTransport.new("localhost", server.addr[1], ca_cert: false, tcp_user_timeout: 0)
+    tcp = t.socket.to_io
+    val = tcp.getsockopt(Socket::IPPROTO_TCP, Socket::TCP_USER_TIMEOUT)
+    refute_equal 15000, val.int
+    t.write(+"ok\n")
+    st.join
+  end
 end

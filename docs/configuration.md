@@ -51,6 +51,45 @@ Default hostname that is going to be sent in syslog message. Example: `ip-10-0-0
 
 Default syslog facility for all records. Example: `LOCAL0`
 
+### tcp_user_timeout
+
+Linux timeout in milliseconds for unacknowledged TCP data. Default `15000`. Set `0` to disable. Ignored on platforms that do not support it.
+
+## Buffering
+
+The plugin uses Fluentd's standard [buffer section](https://docs.fluentd.org/configuration/buffer-section). Retry, overflow, and memory vs file are Fluentd settings.
+
+Default buffer settings (used even if you omit `<buffer>`):
+
+| Parameter | Default |
+| --- | --- |
+| `chunk_keys` | `tag` |
+| `flush_mode` | `interval` |
+| `flush_interval` | `5` (seconds) |
+| buffer `@type` | `memory` if omitted |
+
+Keep `tag` as a chunk key so `app_name` and per-tag `idle_timeout` stay correct.
+
+Without `<buffer>`, events sit in memory (not crash-safe). Use `@type file` and `path` for a backlog that survives restart. When the store is full, `overflow_action` controls ingest (`block`, `throw_exception`, or `drop_oldest_chunk`).
+
+```
+<match **>
+  @type syslog_tls
+  host logs.example.com
+  port 6514
+  format json
+
+  <buffer tag>
+    @type file
+    path /var/log/fluentd/buffer/syslog_tls
+    overflow_action block
+    retry_type exponential_backoff
+    retry_timeout 72h
+    retry_forever false
+  </buffer>
+</match>
+```
+
 ## Per message configuration
 
 Its possible to configure the plugin to extract various parts of syslog message header

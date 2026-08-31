@@ -1,3 +1,9 @@
+#### 2.2.0
+
+* Support Fluentd's standard `<buffer>` section (retry, file vs memory, overflow). Default is a memory buffer with `flush_interval` 5s.
+* Add `tcp_user_timeout` (default 15000 ms). Set `0` to disable.
+
+
 #### 2.1.0
 
 * Require Ruby 2.5

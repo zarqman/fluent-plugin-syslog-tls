@@ -14,6 +14,7 @@
 # limitations under the License.
 
 require 'socket'
+require 'thread'
 require 'syslog_tls/logger'
 require 'fluent/plugin/output'
 
@@ -24,6 +25,7 @@ module Fluent::Plugin
     helpers :inject, :formatter, :compat_parameters
 
     DEFAULT_FORMAT_TYPE = 'json'
+    THREAD_LOGGERS_KEY = :fluent_plugin_syslog_tls_loggers
 
     config_param :host, :string
     config_param :port, :integer
@@ -35,6 +37,8 @@ module Fluent::Plugin
     config_param :client_key, :string, default: nil
     config_param :hostname, :string, default: nil
     config_param :facility, :string, default: 'LOCAL0'
+    # Linux TCP_USER_TIMEOUT (ms). 0 disables. Ignored if the sockopt is missing.
+    config_param :tcp_user_timeout, :integer, default: 15000
 
     # Allow to map keys from record to syslog message headers
     SYSLOG_HEADERS = [
@@ -49,17 +53,37 @@ module Fluent::Plugin
       config_set_default :@type, DEFAULT_FORMAT_TYPE
     end
 
+    config_section :buffer do
+      config_set_default :chunk_keys, ['tag']
+      config_set_default :flush_mode, :interval
+      config_set_default :flush_interval, 5
+      config_set_default :flush_thread_interval, 0.5
+      config_set_default :flush_thread_burst_interval, 0.5
+    end
+
     attr_accessor :formatter
 
 
     def initialize
       super
-      @loggers = {}
+      @loggers_mutex = Mutex.new
+      @loggers = []
     end
 
-    def shutdown
-      @loggers.values.each(&:close)
+    def close
       super
+      @loggers_mutex.synchronize do
+        @loggers.each do |logger|
+          logger.close rescue nil
+        end
+        @loggers.clear
+      end
+      thread_map = Thread.current[THREAD_LOGGERS_KEY]
+      thread_map.delete(object_id) if thread_map
+    end
+
+    def multi_workers_ready?
+      true
     end
 
     # This method is called before starting.
@@ -85,17 +109,15 @@ module Fluent::Plugin
       @formatter = formatter_create(conf: conf.elements('format').first, default_type: DEFAULT_FORMAT_TYPE)
     end
 
-    # Get logger for given tag
     def logger(tag)
-      # Try to reuse existing logger
-      @loggers[tag] ||= new_logger(tag)
-
-      # Create new logger if old one is closed
-      if @loggers[tag].closed?
-        @loggers[tag] = new_logger(tag)
+      cache = loggers_for_current_thread
+      cached = cache[tag]
+      if cached.nil? || cached.closed?
+        cached = new_logger(tag)
+        cache[tag] = cached
+        @loggers_mutex.synchronize { @loggers << cached }
       end
-
-      @loggers[tag]
+      cached
     end
 
     def new_logger(tag)
@@ -106,6 +128,7 @@ module Fluent::Plugin
         client_key: client_key,
         verify_cert_name: verify_cert_name,
         max_retries: 3,
+        tcp_user_timeout: tcp_user_timeout,
       )
       logger = ::SyslogTls::Logger.new(transport, token)
       logger.facility(facility)
@@ -114,37 +137,80 @@ module Fluent::Plugin
       logger
     end
 
-    def format(tag, time, record)
+    def format_payload(tag, time, record)
       record = inject_values_to_record(tag, time, record)
       @formatter.format(tag, time, record)
     end
 
+    def emit_record(tag, time, record)
+      record.each_pair do |k, v|
+        record[k] = v.dup.force_encoding('UTF-8') if v.is_a?(String) && v.encoding != Encoding::UTF_8
+      end
+
+      # Check if severity has been provided in record otherwise use INFO
+      # by default.
+      severity = if @mappings.key?(:severity)
+                   record[@mappings[:severity]] || 'INFO'
+                 else
+                   'INFO'
+                 end
+
+      logger(tag).log(severity, format_payload(tag, time, record), time: time_from(time)) do |header|
+        @mappings.each do |name, record_key|
+          header.send("#{name}=", record[record_key]) unless record[record_key].nil?
+        end
+      end
+    end
+
     def process(tag, es)
       es.each do |time, record|
-        record.each_pair do |k, v|
-          record[k] = v.dup.force_encoding('UTF-8') if v.is_a?(String) && v.encoding != Encoding::UTF_8
-        end
-
-        # Check if severity has been provided in record otherwise use INFO
-        # by default.
-        severity = if @mappings.key?(:severity)
-                     record[@mappings[:severity]] || 'INFO'
-                   else
-                     'INFO'
-                   end
-
-        # Send message to Syslog
         begin
-          logger(tag).log(severity, format(tag, time, record), time: Time.at(time)) do |header|
-            # Map syslog headers from record
-            @mappings.each do |name, record_key|
-              header.send("#{name}=", record[record_key]) unless record[record_key].nil?
-            end
-          end
+          emit_record(tag, time, record)
         rescue => e
           log.error e.to_s
         end
       end
+    end
+
+    def write(chunk)
+      return if chunk.empty?
+      tag = chunk.metadata.tag
+      begin
+        chunk.each do |time, record|
+          begin
+            emit_record(tag, time, record)
+          rescue ArgumentError => e
+            log.error e.to_s
+          end
+        end
+      rescue
+        release_logger_for_current_thread(tag)
+        raise
+      end
+    end
+
+    private
+
+    def time_from(time)
+      case time
+      when Time
+        time
+      else
+        Time.at(time.to_r)
+      end
+    end
+
+    def loggers_for_current_thread
+      all = Thread.current[THREAD_LOGGERS_KEY] ||= {}
+      all[object_id] ||= {}
+    end
+
+    def release_logger_for_current_thread(tag)
+      cache = loggers_for_current_thread
+      logger = cache.delete(tag)
+      return unless logger
+      logger.close rescue nil
+      @loggers_mutex.synchronize { @loggers.delete(logger) }
     end
   end
 end

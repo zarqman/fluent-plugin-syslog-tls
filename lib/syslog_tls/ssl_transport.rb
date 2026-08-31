@@ -25,11 +25,11 @@ module SyslogTls
 
     attr_accessor :socket
 
-    attr_reader :host, :port, :idle_timeout, :ca_cert, :client_cert, :client_key, :verify_cert_name, :ssl_version
+    attr_reader :host, :port, :idle_timeout, :ca_cert, :client_cert, :client_key, :verify_cert_name, :ssl_version, :tcp_user_timeout
 
     attr_writer :retries
 
-    def initialize(host, port, idle_timeout: nil, ca_cert: 'system', client_cert: nil, client_key: nil, verify_cert_name: true, ssl_version: :TLS1_2, max_retries: 1)
+    def initialize(host, port, idle_timeout: nil, ca_cert: 'system', client_cert: nil, client_key: nil, verify_cert_name: true, ssl_version: :TLS1_2, max_retries: 1, tcp_user_timeout: 15000)
       @host = host
       @port = port
       @idle_timeout = idle_timeout
@@ -39,6 +39,7 @@ module SyslogTls
       @verify_cert_name = verify_cert_name
       @ssl_version = ssl_version
       @retries = max_retries
+      @tcp_user_timeout = tcp_user_timeout
       connect
     end
 
@@ -88,7 +89,16 @@ module SyslogTls
       end
 
       tcp.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, true)
+      apply_tcp_user_timeout(tcp)
       tcp
+    end
+
+    def apply_tcp_user_timeout(tcp)
+      return if tcp_user_timeout.nil? || tcp_user_timeout <= 0
+      return unless defined?(Socket::TCP_USER_TIMEOUT)
+      tcp.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_USER_TIMEOUT, tcp_user_timeout)
+    rescue SystemCallError
+      # unsupported on this kernel/platform
     end
 
     def get_ssl_connection
